@@ -2,7 +2,7 @@ var mongoose = require("mongoose");
 
 const leaderBoardSchema = new mongoose.Schema({
     id: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: "users",
         index: true
