@@ -27,7 +27,8 @@ mongoose.connect(process.env.DB_CONNECT, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useCreateIndex: true,
-    useFindAndModify: false
+    useFindAndModify: false,
+    autoIndex: false 
 }).then(() => {
     app.listen(PORT);
     console.log("server started");

@@ -4,7 +4,8 @@ const leaderBoardSchema = new mongoose.Schema({
     id: {
         type: String,
         required: true,
-        ref: "users"
+        ref: "users",
+        index: true
     },
     points:{
         type: Number,
@@ -13,4 +14,4 @@ const leaderBoardSchema = new mongoose.Schema({
     }
 });
 
-module.exports = mongoose.model("leaderBoard", otpSchema);
+module.exports = mongoose.model("leaderBoard", leaderBoardSchema);

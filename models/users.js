@@ -1,14 +1,10 @@
 var mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
-    id: {
-        type: String,
-        required: true,
-    },
     name:{
         type: String,
-        required: true
+        required: true,
     }
 });
 
-module.exports = mongoose.model("users", otpSchema);
+module.exports = mongoose.model("users", userSchema);
