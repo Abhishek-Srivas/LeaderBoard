@@ -61,18 +61,31 @@ exports.updatePoints = async (req, res, next) => {
       },
       { new: true }
     ).populate('id');
-    
+
     console.log(newRecord);
     const name = newRecord.id.name;
     const newPoints = newRecord.points;
-    const value = name+':'+JSON.stringify(newPoints);
+    const value = name + ':' + JSON.stringify(newPoints);
     console.log(value);
     // const client = await redisClient();
     redisClient.then(async (client) => {
-      const updatedKey = await client.ZADD("abc",{score:newPoints,value:user});
+      const updatedKey = await client.ZADD("set", { score: newPoints, value: user + ':' + name });
       res.json(updatedKey);
     });
   } catch (err) {
     console.log(err);
+  }
+};
+
+exports.getLeaderboard = async (req, res, next) => {
+  try {
+    const { user } = req.query;
+    redisClient.then(async (client) => {
+      const ld = await client.ZREVRANGEBYSCORE("set", 0, 500);
+      console.log(ld);
+      res.json(ld);
+    });
+  } catch (error) {
+    next(error)
   }
 };
