@@ -1,6 +1,4 @@
 const redis = require("redis");
-const bluebird = require("bluebird");
-bluebird.promisifyAll(redis);
 async function createRedisClient() {
   
   const client = redis.createClient({
