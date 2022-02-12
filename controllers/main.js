@@ -62,18 +62,33 @@ exports.updatePoints = async (req, res, next) => {
       { new: true }
     ).populate("id");
 
-    console.log(newRecord);
-    const name = newRecord.id.name;
-    const newPoints = newRecord.points;
-    const value = name + ":" + JSON.stringify(newPoints);
-    console.log(value);
-    // const client = await redisClient();
     redisClient.then(async (client) => {
-      const updatedKey = await client.ZADD("set", {
-        score: newPoints,
-        value: user + ":" + name,
-      });
-      res.json(updatedKey);
+      //first make a hash of user details
+      client.hmset(user,"name",newRecord.id.name,function(err,result){
+        if(err)
+        {
+          console.log(1);
+          return res.json(err);
+        }
+        else
+        {
+          client.zadd("leaderboard",JSON.stringify(newRecord.points),user,function(err,data){
+            if(err)
+            {
+              console.log(2);
+              return res.json(err)
+            }
+            else
+            {
+              console.log(3);
+              return res.json({
+                result,
+                data
+              })
+            }
+          })
+        }
+      })
     });
   } catch (err) {
     console.log(err);
@@ -82,12 +97,39 @@ exports.updatePoints = async (req, res, next) => {
 
 exports.getLeaderboard = async (req, res, next) => {
   try {
-    const { user } = req.query;
     redisClient.then(async (client) => {
-      const ld = await client.ZREVRANGEBYSCORE("set", 0, 500);
-      console.log(ld);
-      res.json(ld);
-    });
+      let rank =[]
+      client.zrevrange("leaderboard", 0, -1, 'withscores', function (err, result) {
+        //console.log(result);
+        //build result array
+        //user rank object
+        const user_data = {
+          name : "",
+          id : "",
+          rank: "",
+          score : ""
+
+        }
+        for(let i=0;i<result.length;i+=2)
+        {
+         // console.log(result[i])
+          client.hgetall(result[i],function(err,data){
+            if(err)
+            {
+              return res.json(err);
+            }
+            const user = Object.create(user_data);
+            user.name = data.name
+            user.id = result[i]
+            user.score = result[i+1]
+            user.rank = (i/2)+1
+            rank.push(user);
+            console.log(rank);
+          })
+        }
+        return res.json(rank);
+      });
+    })
   } catch (error) {
     next(error);
   }
