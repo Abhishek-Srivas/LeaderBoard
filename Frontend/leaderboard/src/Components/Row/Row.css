@@ -1,0 +1,4 @@
+.LeaderBoard-Table-Row{
+    display: flex;
+    justify-content: space-evenly;
+}

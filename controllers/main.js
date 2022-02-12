@@ -62,7 +62,7 @@ exports.updatePoints = async (req, res, next) => {
         $inc: { points: newPoint },
       },
       { new: true }
-    ).populate('id');
+    ).populate("id");
 
     redisClient.then(async (client) => {
       const zadd = promisify(client.zadd).bind(client);
@@ -97,7 +97,63 @@ exports.getLeaderboard = async (req, res, next) => {
       return res.json(rank);
     })
   } catch (error) {
-    next(error)
+    next(error);
+  }
+};
+
+exports.dummyData = async (req, res, next) => {
+  try {
+    const data = [
+      {
+        rank: 1,
+        name: "abc",
+        points: "100",
+      },
+      {
+        rank: 1,
+        name: "abc",
+        points: "100",
+      },
+      {
+        rank: 1,
+        name: "abc",
+        points: "100",
+      },
+      {
+        rank: 1,
+        name: "abc",
+        points: "100",
+      },
+      {
+        rank: 1,
+        name: "abc",
+        points: "100",
+      },
+      {
+        rank: 1,
+        name: "abc",
+        points: "100",
+      },
+      {
+        rank: 1,
+        name: "abc",
+        points: "100",
+      },
+      {
+        rank: 1,
+        name: "abc",
+        points: "100",
+      },
+      {
+        rank: 1,
+        name: "abc",
+        points: "100",
+      },
+    ];
+
+    res.json(data);
+  } catch (error) {
+    next(error);
   }
 };
 

@@ -1,0 +1,4 @@
+.LeaderBoard-Table{
+    display: flex;
+    flex-direction: column;
+}
