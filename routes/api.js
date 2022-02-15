@@ -7,5 +7,6 @@ router.use('/testing',mainController.search);
 router.use('/update-points',mainController.updatePoints);
 router.get("/leaderboard",mainController.getLeaderboard);
 router.get("/dummyData",mainController.dummyData);
+router.get("/userDetail",mainController.userDetail);
 
 module.exports = router;

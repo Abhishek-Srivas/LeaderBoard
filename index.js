@@ -20,7 +20,7 @@ app.use("*", (req, res) => {
     res.status(404).json({ success: false, message: "Resource not found" });
 });
 
-let PORT = process.env.PORT || 3000;
+let PORT = process.env.PORT || 8000;
 
 //connecting to database
 mongoose.connect(process.env.DB_CONNECT, {

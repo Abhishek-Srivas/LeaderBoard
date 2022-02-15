@@ -157,6 +157,20 @@ exports.dummyData = async (req, res, next) => {
   }
 };
 
+exports.userDetail = async (req, res, next) => {
+  try {
+    const data = 
+      {
+        rank: 1375,
+        name: "Sachan",
+        points: "3220",
+      }
+    res.json(data);
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.getTopTen = async(req,res,next)=>{
   try {
     

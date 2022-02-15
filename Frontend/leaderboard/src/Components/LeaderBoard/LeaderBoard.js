@@ -8,12 +8,19 @@ const LeaderBoard = () => {
   const [currUser, setCurrUser] = useState();
 
   useEffect(() => {
-    async function fetchMyAPI() {
+    async function fetchLeaderBoard() {
       const data = await axios.get("http://localhost:8000/api/dummyData/");
       setUsers(data.data);
       console.log(users);
     }
-    fetchMyAPI();
+
+    async function fetchUserDetail() {
+      const data = await axios.get("http://localhost:8000/api/userDetail");
+      setCurrUser(data.data);
+      console.log(currUser);
+    }
+    fetchLeaderBoard();
+    fetchUserDetail();
   }, []);
 
   const submitHandler = async (e) => {
@@ -31,7 +38,7 @@ const LeaderBoard = () => {
 
   return (
     <div>
-      <h1>LeaderBoard</h1>
+      <h2>LeaderBoard</h2>
       <div className="LeaderBoard-Table">
         <div className="LeaderBoard-Table-Row">
           <h3>Rank</h3>
@@ -51,13 +58,20 @@ const LeaderBoard = () => {
             })
           : ""}
       </div>
-      <h1>User Board</h1>
+      <h2>User Board</h2>
       {currUser ? (
+        <>
+        <div className="LeaderBoard-Table-Row">
+        <h3>Rank</h3>
+        <h3>Name</h3>
+        <h3>Points</h3>
+      </div>
         <Row
           rank={currUser.rank}
           name={currUser.name}
           points={currUser.points}
         />
+        </>
       ) : (
         ""
       )}
