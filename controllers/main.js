@@ -109,62 +109,6 @@ exports.getLeaderboard = async (req, res, next) => {
   }
 };
 
-exports.dummyData = async (req, res, next) => {
-  try {
-    const data = [
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-    ];
-
-    res.json(data);
-  } catch (error) {
-    next(error);
-  }
-};
-
 exports.getTopTen = async (req, res, next) => {
   try {
     const { user } = req.query;
