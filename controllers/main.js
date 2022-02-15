@@ -15,24 +15,9 @@ const leaderboard = require("../models/leaderboard");
 const promise = require("bluebird/js/release/promise");
 const { get } = require("http");
 
-exports.search = async (req, res, next) => {
-  try {
-    const name = "western_tern";
-    const _id = "62052529b084d64e34b934fb";
-    const detail = await User.find({ name });
-    res.json(detail);
-  } catch (err) {
-    res.json(err);
-  }
-};
-
 //added 1 million user
 exports.addUser = async (req, res, next) => {
   try {
-    // const { name } = req.body;
-    // const newUser = await User.create(name);
-    // await res.status(201).json({ success: true, data: "User Added" });
-
     // Inserting 10K users
     const data = [];
     for (let i = 0; i < 100000; i++) {
@@ -55,6 +40,7 @@ exports.addUser = async (req, res, next) => {
   }
 };
 
+//api to cache user in bulk
 exports.addToCache = async (req, res, next) => {
   try {
     redisClient.then(async (client) => {
@@ -64,7 +50,7 @@ exports.addToCache = async (req, res, next) => {
         .find()
         .populate("id")
         .limit(40000)
-        .skip(60000);
+        //.skip(60000);
       console.log(1);
       pt = [];
       for (let i = 0; i < 40000; i += 1) {
@@ -94,77 +80,7 @@ exports.addToCache = async (req, res, next) => {
   }
 };
 
-exports.getLeaderboard = async (req, res, next) => {
-  try {
-    redisClient.then(async (client) => {
-      const zrevrange = promisify(client.zrevrange).bind(client);
-      const hmget = promisify(client.hmget).bind(client);
-      const zrank = promisify(client.zrank).bind(client);
-      let rank = [];
-      const data = await zrevrange("leaderboard", 0, 10, "withscores");
-      return res.json(data);
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-exports.dummyData = async (req, res, next) => {
-  try {
-    const data = [
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-      {
-        rank: 1,
-        name: "abc",
-        points: "100",
-      },
-    ];
-
-    res.json(data);
-  } catch (error) {
-    next(error);
-  }
-};
-
+//get top 10 along with current user details
 exports.getTopTen = async (req, res, next) => {
   try {
     const { user } = req.query;
@@ -222,6 +138,7 @@ exports.getTopTen = async (req, res, next) => {
   }
 };
 
+//increment user's current score
 exports.increScore = async (req, res, next) => {
   try {
     const { user } = req.query;
@@ -260,8 +177,8 @@ exports.increScore = async (req, res, next) => {
         a2,
         a3
       ]);
-      console.log(freq);
-      console.log(oldPoints);
+      //console.log(freq);
+      //console.log(oldPoints);
       if (freq === '1') {
         await ZREM("score", oldPoints)
       }
