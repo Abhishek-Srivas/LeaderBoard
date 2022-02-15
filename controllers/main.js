@@ -128,6 +128,7 @@ exports.getTopTen = async (req, res, next) => {
         t4,
         t5,
       ]);
+      const xd = zrevrank("score", user_score);
       const data = [];
       let startRank = 1,
         pre = -1;
@@ -146,7 +147,7 @@ exports.getTopTen = async (req, res, next) => {
           return hget(id, "name");
         })
       );
-      const user_rank = await zrevrank("score", user_score);
+      const user_rank = await xd;
       //console.log(data);
       const results = names.map((name, index) => ({
         name: name,

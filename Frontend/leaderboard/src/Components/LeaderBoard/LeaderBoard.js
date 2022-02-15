@@ -10,7 +10,7 @@ const LeaderBoard = () => {
   useEffect(() => {
     async function fetchLeaderBoard() {
       const data = await axios.get(
-        "http://localhost:8000/api/top10?user=62069c598b90493bf455f7a8"
+        "http://localhost:8000/api/top10?user=62069c598b90493bf455f7a4"
       );
 
       console.log(data.data.results);
@@ -32,7 +32,7 @@ const LeaderBoard = () => {
       score: e.target.points.value,
     };
     const response = await axios.post(
-      "http://localhost:8000/api/addPoint?user=62069c598b90493bf455f79a",
+      `http://localhost:8000/api/addPoint?user=${e.target.id.value}`,
       data
     );
     console.log(response);
