@@ -188,12 +188,13 @@ exports.getTopTen = async (req, res, next) => {
       let startRank = 1,
         pre = -1;
       for (let i = 0; i < ranks.length; i += 2) {
+        if(pre==-1) pre=ranks[i+1];
+        if (pre != ranks[i + 1]) startRank += 1;
         data.push({
           rank: startRank,
-          userid: ranks[i], //comapny id
+          userid: ranks[i],
           score: ranks[i + 1],
         });
-        if (pre != ranks[i + 1]) startRank += 1;
         pre = ranks[i + 1];
       }
       const names = await Promise.all(
@@ -215,30 +216,6 @@ exports.getTopTen = async (req, res, next) => {
         user_score,
         user_rank: user_rank + 1,
       });
-      // const zscore = promisify(client.zscore).bind(client);
-      // const zrevrank = promisify(client.zrevrank).bind(client);
-      // const rank = []
-      // const data = zrevange("leaderboard", 0, 9, 'withscores'); //withscores
-      // const data1 = zrange("leaderboard", 0, 10); //only user ids
-      // const score = zrange("score", 0, 10); //score
-      // const user_score = zscore("leaderboard", user);
-      // const user_name = hmget(user, "name");
-      // const [t1, t2, t3, t4, t5] = await Promise.all([data, score, data1, user_score, user_name]);
-      // console.log(t4);
-      // // console.log(data);
-      // const promises = t3.map((userid) => {
-      //   //console.log(userid)
-      //   return hmget(userid, "name")
-      // });
-      // const names = await Promise.all(promises);
-      // //console.log(names)
-      // return res.json({
-      //   data: t1, score: t2, names: names, user: {
-      //     name: t5[0],
-      //     score: t4,
-      //     id: user
-      //   }
-      // });
     });
   } catch (error) {
     next(error);
@@ -251,7 +228,7 @@ exports.increScore = async (req, res, next) => {
     const { score } = req.body;
 
     redisClient.then(async (client) => {
-      
+
       const ZINCRBY = promisify(client.zincrby).bind(client);
       const INCR = promisify(client.incr).bind(client);
       const DECR = promisify(client.decr).bind(client);
@@ -260,41 +237,38 @@ exports.increScore = async (req, res, next) => {
       const ZREM = promisify(client.zrem).bind(client);
       const updateScorePromise = LeaderBoard.findOneAndUpdate(
         { id: user },
-        {$inc:{ points: score }},
+        { $inc: { points: score } },
         { new: true }
       );
 
       const t1 = ZINCRBY("leaderboard", score, user);
-      // const t2 = incy(user);
-      // const t3 = zincrby("score", score, user);
-      
-      
+
       const [updatedScore, updatedLeaderBoardSet] = await Promise.all([
         updateScorePromise,
         t1
       ]);
-      
+
       const updatedPoints = updatedScore.points;
-      const oldPoints = updatedPoints-score
-      
-      
-        const a1 = INCR(updatedPoints);
-        const a2 = ZADD("score", updatedPoints, updatedPoints);
-        const a3 = GET(oldPoints);
-        const [new_key, new_set,freq] = await Promise.all([
-          a1,
-          a2,
-          a3
-        ]);  
-        console.log(freq);
-        console.log(oldPoints);
-        if(freq === '1'){
-          await ZREM("score",oldPoints)
-        }
-        if(oldPoints != 0){
-          await DECR(oldPoints);
-        }
-        
+      const oldPoints = updatedPoints - score
+
+
+      const a1 = INCR(updatedPoints);
+      const a2 = ZADD("score", updatedPoints, updatedPoints);
+      const a3 = GET(oldPoints);
+      const [new_key, new_set, freq] = await Promise.all([
+        a1,
+        a2,
+        a3
+      ]);
+      console.log(freq);
+      console.log(oldPoints);
+      if (freq === '1') {
+        await ZREM("score", oldPoints)
+      }
+      if (oldPoints != 0) {
+        await DECR(oldPoints);
+      }
+
 
       res.json({
         updatedScore,
