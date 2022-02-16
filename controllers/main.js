@@ -15,24 +15,9 @@ const leaderboard = require("../models/leaderboard");
 const promise = require("bluebird/js/release/promise");
 const { get } = require("http");
 
-exports.search = async (req, res, next) => {
-  try {
-    const name = "western_tern";
-    const _id = "62052529b084d64e34b934fb";
-    const detail = await User.find({ name });
-    res.json(detail);
-  } catch (err) {
-    res.json(err);
-  }
-};
-
 //added 1 million user
 exports.addUser = async (req, res, next) => {
   try {
-    // const { name } = req.body;
-    // const newUser = await User.create(name);
-    // await res.status(201).json({ success: true, data: "User Added" });
-
     // Inserting 10K users
     const data = [];
     for (let i = 0; i < 100000; i++) {
@@ -55,6 +40,7 @@ exports.addUser = async (req, res, next) => {
   }
 };
 
+//api to cache user in bulk
 exports.addToCache = async (req, res, next) => {
   try {
     redisClient.then(async (client) => {
@@ -64,7 +50,7 @@ exports.addToCache = async (req, res, next) => {
         .find()
         .populate("id")
         .limit(40000)
-        .skip(60000);
+        //.skip(60000);
       console.log(1);
       pt = [];
       for (let i = 0; i < 40000; i += 1) {
@@ -94,21 +80,7 @@ exports.addToCache = async (req, res, next) => {
   }
 };
 
-exports.getLeaderboard = async (req, res, next) => {
-  try {
-    redisClient.then(async (client) => {
-      const zrevrange = promisify(client.zrevrange).bind(client);
-      const hmget = promisify(client.hmget).bind(client);
-      const zrank = promisify(client.zrank).bind(client);
-      let rank = [];
-      const data = await zrevrange("leaderboard", 0, 10, "withscores");
-      return res.json(data);
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
+//get top 10 along with current user details
 exports.getTopTen = async (req, res, next) => {
   try {
     const { user } = req.query;
@@ -128,7 +100,7 @@ exports.getTopTen = async (req, res, next) => {
         t4,
         t5,
       ]);
-      const xd = zrevrank("score", user_score);
+      const t3 = zrevrank("score", user_score);
       const data = [];
       let startRank = 1,
         pre = -1;
@@ -147,7 +119,7 @@ exports.getTopTen = async (req, res, next) => {
           return hget(id, "name");
         })
       );
-      const user_rank = await xd;
+      const user_rank = await t3;
       //console.log(data);
       const results = names.map((name, index) => ({
         name: name,
@@ -167,6 +139,7 @@ exports.getTopTen = async (req, res, next) => {
   }
 };
 
+//increment user's current score
 exports.increScore = async (req, res, next) => {
   try {
     const { user } = req.query;
@@ -184,36 +157,34 @@ exports.increScore = async (req, res, next) => {
         { id: user },
         { $inc: { points: score } },
         { new: true }
-      );
+      ); //Updating Database
 
-      const t1 = ZINCRBY("leaderboard", score, user);
+      const t1 = ZINCRBY("leaderboard", score, user); // Incrementing leaderBoard Sorted Set
 
       const [updatedScore, updatedLeaderBoardSet] = await Promise.all([
         updateScorePromise,
         t1
       ]);
 
-      const updatedPoints = updatedScore.points;
-      const oldPoints = updatedPoints - score
+      const updatedPoints = updatedScore.points; // New Points of user
+      const oldPoints = updatedPoints - score // Old points of user
 
 
-      const a1 = INCR(updatedPoints);
-      const a2 = ZADD("score", updatedPoints, updatedPoints);
-      const a3 = GET(oldPoints);
+      const a1 = INCR(updatedPoints); // Updaing the Frequency Key
+      const a2 = ZADD("score", updatedPoints, updatedPoints); // Adding New Score to Score set
+      const a3 = GET(oldPoints); // Getting Frequency of Old Points
       const [new_key, new_set, freq] = await Promise.all([
         a1,
         a2,
         a3
       ]);
-      console.log(freq);
-      console.log(oldPoints);
-      if (freq === '1') {
+      
+      if (freq === '1') { // If freqnecy is 1 Then that element is updated so removed from score set
         await ZREM("score", oldPoints)
       }
-      if (oldPoints != 0) {
+      if (oldPoints != 0) { // NO need for decrementation if score is zero
         await DECR(oldPoints);
       }
-
 
       res.json({
         updatedScore,
